@@ -1,95 +1,99 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client"
+import { useState } from "react";
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [path, setPath] = useState("");
+  const [params, setParams] = useState([{ name: "", value: "" }]);
+  const [generatedURL, setGeneratedURL] = useState("");
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const handleAddParam = () => {
+    setParams([...params, { name: "", value: "" }]);
+  };
+
+  const handleParamChange = (index, field, value) => {
+    const newParams = [...params];
+    newParams[index][field] = value;
+    setParams(newParams);
+  };
+
+  const handleGenerateURL = () => {
+    const query = new URLSearchParams();
+    params.forEach((param) => {
+      if (param.name && param.value) {
+        query.append(param.name, param.value);
+      }
+    });
+    const url = `${path}?${query.toString()}`;
+    setGeneratedURL(url);
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(url).then(() => {
+      alert("URL copied to clipboard!");
+    });
+  };
+
+  const handleDelParam = (index) => {
+    params.pop(index);
+  };
+
+  return (
+    <div className="container">
+      <div className="form-card">
+        <h1>Generador de URL Personalizado de SPOT Local</h1>
+        <p>
+          💡 Complete el formulario y genere un enlace personalizado a un SPOT
+        </p>
+        <label>
+          <strong>Path:</strong>
+          <input
+            type="text"
+            placeholder="/example-path"
+            value={path}
+            onChange={(e) => setPath(e.target.value)}
+            className="input-field"
+          />
+        </label>
+        <h3>Parámetros:</h3>
+        {params.map((param, index) => (
+          <div key={index} className="param-row">
+            <input
+              type="text"
+              placeholder="Nombre"
+              value={param.name}
+              onChange={(e) =>
+                handleParamChange(index, "name", e.target.value)
+              }
+              className="input-field small"
             />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            <input
+              type="text"
+              placeholder="Valor"
+              value={param.value}
+              onChange={(e) =>
+                handleParamChange(index, "value", e.target.value)
+              }
+              className="input-field small"
+            />
+            <button onClick={handleDelParam} className="button secondary">
+              Borrar
+            </button>
+          </div>
+          
+        ))}
+        <button onClick={handleAddParam} className="button secondary">
+          Agregar Parámetro
+        </button>
+        <br />
+        <button onClick={handleGenerateURL} className="button primary">
+          Generar URL y Copiar
+        </button>
+        {generatedURL && (
+          <div className="result">
+            <strong>URL Generada:</strong>
+            <p>{generatedURL}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
